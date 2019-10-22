@@ -24,7 +24,13 @@ func CreateParkingLot(size uint64) *ParkingLot {
 	parkingLot.colorSlotNumbersDict = map[string][]uint64{}
 	parkingLot.registrationNumberSlotDict = map[string]uint64{}
 	if size > 0 {
-		parkingLot.nextAvailableSpotNumber = []uint64{1} // initialize the next available spot as 1 if size > 0
+		parkingLot.nextAvailableSpotNumber = []uint64{}
+		var i uint64
+		for i = 1; i <= size; i++ {
+			parkingLot.nextAvailableSpotNumber = append(parkingLot.nextAvailableSpotNumber, i)
+		}
+
+		// initialize the next available spot as 1 if size > 0
 	} else {
 		parkingLot.nextAvailableSpotNumber = []uint64{} // not available
 	}
