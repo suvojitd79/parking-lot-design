@@ -9,7 +9,7 @@ type ParkingLot struct {
 	slots                        []Slot
 	colorRegistrationNumbersDict map[string][]string // returns a list of registrations on passing a color as a key (color - > reg ids)
 	colorSlotNumbersDict         map[string][]uint64 // returns the slot ids for a specific color (color -> slots)
-	registrationNumbeSlotDict    map[string]uint64   // returns the slot number for a specific registration number
+	registrationNumberSlotDict   map[string]uint64   // returns the slot number for a specific registration number
 	nextAvailableSpotNumber      []uint64            // holds the info regarding next available spot, first value will always gives the next available spot
 }
 
@@ -22,7 +22,7 @@ func CreateParkingLot(size uint64) *ParkingLot {
 	parkingLot.slots = []Slot{}
 	parkingLot.colorRegistrationNumbersDict = map[string][]string{}
 	parkingLot.colorSlotNumbersDict = map[string][]uint64{}
-	parkingLot.registrationNumbeSlotDict = map[string]uint64{}
+	parkingLot.registrationNumberSlotDict = map[string]uint64{}
 	if size > 0 {
 		parkingLot.nextAvailableSpotNumber = []uint64{1} // initialize the next available spot as 1 if size > 0
 	} else {
@@ -60,6 +60,8 @@ func (lot ParkingLot) GetSlotByID(id uint64) (Slot, error) {
 	return lot.slots[id-1], nil
 }
 
+//M1 =============================================================================
+
 //GetRegistrationNumbes - gives the list of reg. no associated with a color
 func (lot ParkingLot) GetRegistrationNumbes(color string) ([]string, error) {
 
@@ -91,6 +93,7 @@ func (lot *ParkingLot) RemoveRegistrationNumber(vh Vehicle) {
 //AddRegistrationNumber - add reg no. associated with a color
 func (lot *ParkingLot) AddRegistrationNumber(vh Vehicle) {
 
+	lot.RemoveRegistrationNumber(vh) // double check before putting an item in the map
 	vhColor := vh.Color()
 	vhRegistrationNo := vh.RegistrationNumber()
 
@@ -102,6 +105,8 @@ func (lot *ParkingLot) AddRegistrationNumber(vh Vehicle) {
 
 }
 
+//M2 =============================================================================
+
 //GetSlotNumbers - gives the list of reg. no associated with a color
 func (lot ParkingLot) GetSlotNumbers(color string) ([]uint64, error) {
 
@@ -111,14 +116,75 @@ func (lot ParkingLot) GetSlotNumbers(color string) ([]uint64, error) {
 	return []uint64{}, errors.New("Not found") // empty list if not found
 }
 
+//RemoveSlotNumbers - removes the reg. no associated with a color
+func (lot *ParkingLot) RemoveSlotNumbers(vh Vehicle) {
+
+	vhColor := vh.Color()
+	vhRegistrationNo := vh.RegistrationNumber()
+
+	slotID, found := lot.registrationNumberSlotDict[vhRegistrationNo]
+
+	if !found {
+		return // not found
+	}
+
+	if val, f := lot.colorSlotNumbersDict[vhColor]; f {
+
+		for index, slotNo := range val {
+
+			if slotNo == slotID {
+
+				lot.colorSlotNumbersDict[vhColor] = append(val[:index], val[index+1:]...)
+			}
+
+		}
+
+	}
+}
+
+//AddSlotNumbers - add the reg. no associated with a color
+func (lot *ParkingLot) AddSlotNumbers(vh Vehicle, id uint64) {
+
+	lot.RemoveSlotNumbers(vh) // double check before putting an item in the map
+
+	vhColor := vh.Color()
+	vhRegistrationNo := vh.RegistrationNumber()
+
+	if val, found := lot.colorSlotNumbersDict[vhColor]; found {
+		lot.colorSlotNumbersDict[vhColor] = append(val, id)
+	} else {
+		lot.colorSlotNumbersDict[vhColor] = []uint64{id}
+	}
+
+}
+
+//M3 =============================================================================
+
 //GetSlotNumber - gives the slot number associated with a registration number
 func (lot ParkingLot) GetSlotNumber(registration string) (uint64, error) {
 
-	if val, found := lot.registrationNumbeSlotDict[registration]; found {
+	if val, found := lot.registrationNumberSlotDict[registration]; found {
 		return val, nil
 	}
 	return 0, errors.New("Not found") // empty list if not found
 }
+
+//RemoveSlotNumber - removes slot number associated with a registration number
+func (lot *ParkingLot) RemoveSlotNumber(vh Vehicle) {
+	regNo := vh.RegistrationNumber()
+	if val, found := lot.registrationNumberSlotDict[regNo]; found {
+		delete(lot.registrationNumberSlotDict, regNo)
+	}
+}
+
+//AddSlotNumber - add the slot number associated with a registration number
+func (lot *ParkingLot) AddSlotNumber(vh Vehicle, slot uint64) {
+	regNo := vh.RegistrationNumber()
+	lot.RemoveSlotNumber(vh)
+	lot.registrationNumberSlotDict[regNo] = slot
+}
+
+//========================================================================
 
 //pollAvailableSpotIndex - returns & remove the first item of nextAvailableSpotNumber
 func (lot *ParkingLot) pollAvailableSpotIndex() uint64 {
@@ -151,13 +217,14 @@ func (lot *ParkingLot) Park(vh Vehicle) (string, error) {
 		lot.slots = append(lot.slots, Slot{id: availableSpotNumber, isAvailable: false, vehicle: vh})
 	}
 
-	// updates the maps
+	//AddRegistrationNumber - add reg no. associated with a color
+	lot.AddRegistrationNumber(vh)
 
-	//GetRegistrationNumbes - gives the list of reg. no associated with a color
-	lot.reg
+	//AddSlotNumber - add the slot number associated with a registration number
+	lot.AddSlotNumber(vh, availableSpotNumber)
 
-	//GetSlotNumbers - gives the list of reg. no associated with a color
+	//AddSlotNumbers - add the reg. no associated with a color
+	lot.AddSlotNumbers(vh, availableSpotNumber)
 
-	//GetSlotNumber - gives the slot number associated with a registration number
-
+	return "Allocated slot number: " + string(availableSpotNumber), nil
 }
