@@ -11,7 +11,7 @@ func (vehicle Vehicle) RegistrationNumber() string {
 	return vehicle.registrationNumber
 }
 
-//Color - returns the color of the vehicle
+// Color - returns the color of the vehicle
 func (vehicle Vehicle) Color() string {
 	return vehicle.color
 }
