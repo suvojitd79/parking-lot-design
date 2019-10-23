@@ -5,3 +5,12 @@
 #
 # After this is run, bin/parking_lot
 # should Just Work.
+
+# test suite 
+cd $(pwd)/src/test 
+go test -count=1 -v  
+cd ../..
+# run the application
+bin/parking_lot 
+
+ 

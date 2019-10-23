@@ -17,20 +17,27 @@ func main() {
 	// read input from a file if possible
 	if len(args) > 1 {
 		processData("file", args[1]) // read from file
+	} else {
+		processData("cmd", "") // read from console
 	}
-	processData("cmd", "") // read from console
 }
 
-// provided file must be in bin directory
-func processData(readFrom, fileName string) {
+//  provided file must be in bin directory
+//  ******filePath - should be the absolute path of the file
+//  example - if the file is called file_inputs.txt
+//  under bin directory   then filePath should be                         ///  /home/username/go/src/parking_lot/bin/file_inputs.txt
+//
+
+func processData(readFrom, filePath string) {
 
 	var scanner *bufio.Scanner
 
 	// read from file
 	if readFrom == "file" {
 
-		filePath, _ := os.Getwd()
-		filePath = filePath[:len(filePath)-3] + "bin/" + fileName
+		// testing purpose only ->
+		// filePath, _ := os.Getwd()
+		// filePath = filePath[:len(filePath)-3] + "bin/" + fileName
 
 		file, e := os.Open(filePath)
 
@@ -38,10 +45,6 @@ func processData(readFrom, fileName string) {
 			log.Fatal(e) // error
 			return
 		}
-
-		fmt.Println("================================")
-		fmt.Println("READING DATA FROM THE PATH " + filePath)
-		fmt.Println("================================")
 
 		defer file.Close()
 
@@ -54,10 +57,6 @@ func processData(readFrom, fileName string) {
 		scanner = bufio.NewScanner(os.Stdin)
 
 		// by default the data should be read from console
-
-		fmt.Println("================================")
-		fmt.Println("READING DATA FROM COMMAND PROMPT")
-		fmt.Println("================================")
 
 	}
 
