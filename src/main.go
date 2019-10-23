@@ -16,27 +16,54 @@ func main() {
 
 	// read input from a file if possible
 	if len(args) > 1 {
-		readFromFile(args[1]) // passing the file name
+		processData("file", args[1]) // read from file
 	}
-
+	processData("cmd", "") // read from console
 }
 
 // provided file must be in bin directory
-func readFromFile(fileName string) {
+func processData(readFrom, fileName string) {
 
-	filePath, _ := os.Getwd()
-	filePath = filePath[:len(filePath)-3] + "bin/" + fileName
+	var scanner *bufio.Scanner
 
-	file, e := os.Open(filePath)
+	// read from file
+	if readFrom == "file" {
 
-	if e != nil {
-		log.Fatal(e) // error
-		return
+		filePath, _ := os.Getwd()
+		filePath = filePath[:len(filePath)-3] + "bin/" + fileName
+
+		file, e := os.Open(filePath)
+
+		if e != nil {
+			log.Fatal(e) // error
+			return
+		}
+
+		fmt.Println("================================")
+		fmt.Println("READING DATA FROM THE PATH " + filePath)
+		fmt.Println("================================")
+
+		defer file.Close()
+
+		// read from file
+		scanner = bufio.NewScanner(file)
+
+	} else if readFrom == "cmd" { // read from console
+
+		//read from std in
+		scanner = bufio.NewScanner(os.Stdin)
+
+		// by default the data should be read from console
+
+		fmt.Println("================================")
+		fmt.Println("READING DATA FROM COMMAND PROMPT")
+		fmt.Println("================================")
+
 	}
 
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
+	if scanner == nil {
+		return // corner case - if no specific option is provided
+	}
 
 	var parkingLot *model.ParkingLot
 	var msg string
@@ -50,7 +77,6 @@ func readFromFile(fileName string) {
 
 		case "create_parking_lot":
 			size, _ := strconv.ParseInt(strings.TrimSpace(inputLine[1]), 10, 64)
-			fmt.Println(size)
 			parkingLot, msg = model.CreateParkingLot(uint64(size))
 			fmt.Println(msg)
 			break
@@ -94,7 +120,16 @@ func readFromFile(fileName string) {
 			}
 			color := strings.TrimSpace(inputLine[1])
 			ans, _ := parkingLot.GetRegistrationNumbes(color)
-			fmt.Println(ans)
+			if len(ans) < 2 {
+				fmt.Println(ans)
+			} else {
+				// format the output
+				for i := 0; i < len(ans)-1; i++ {
+					fmt.Print(ans[i] + ", ")
+				}
+				fmt.Println(ans[len(ans)-1])
+			}
+
 			break
 
 		case "slot_numbers_for_cars_with_colour":
@@ -103,7 +138,15 @@ func readFromFile(fileName string) {
 			}
 			color := strings.TrimSpace(inputLine[1])
 			ans, _ := parkingLot.GetSlotNumbers(color)
-			fmt.Println(ans)
+			if len(ans) < 2 {
+				fmt.Println(ans)
+			} else {
+				// format the output
+				for i := 0; i < len(ans)-1; i++ {
+					fmt.Print(strconv.FormatUint(ans[i], 10) + ", ")
+				}
+				fmt.Println(ans[len(ans)-1])
+			}
 			break
 
 		case "slot_number_for_registration_number":

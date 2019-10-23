@@ -293,7 +293,7 @@ func (lot *ParkingLot) Status() {
 			id := strconv.FormatUint(val.ID(), 10)
 			regNo := val.GetVehicle().RegistrationNumber()
 			col := val.GetVehicle().Color()
-			fmt.Println(id + "\t\t " + regNo + "\t\t\t " + col)
+			fmt.Println(id + "\t\t " + regNo + "\t\t " + col)
 
 		}
 
