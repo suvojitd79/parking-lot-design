@@ -1,0 +1,12 @@
+[
+  {
+    "input": {
+      "registrationNumber": "UUUUI-OPOPOP-OPOP",
+      "color": "Pink"
+    },
+    "output": {
+      "registrationNumber": "UUUUI-OPOPOP-OPOP",
+      "color": "Pink"
+    }
+  }
+]
