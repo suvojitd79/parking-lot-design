@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"strconv"
 )
@@ -277,5 +278,25 @@ func (lot *ParkingLot) Leave(id uint64) (string, error) {
 	lot.AddAvailableSpotIndex(id)
 
 	return "Slot number " + strconv.FormatUint(id, 10) + " is free", nil
+
+}
+
+//Status - gives the info of all available cars
+func (lot *ParkingLot) Status() {
+
+	fmt.Println("Slot No.\t Registration No\t Colour")
+	for _, val := range lot.GetSlots() {
+
+		// vehicle is parked
+		if !val.IsAvailable() {
+
+			id := strconv.FormatUint(val.ID(), 10)
+			regNo := val.GetVehicle().RegistrationNumber()
+			col := val.GetVehicle().Color()
+			fmt.Println(id + "\t\t " + regNo + "\t\t\t " + col)
+
+		}
+
+	}
 
 }
