@@ -7,6 +7,16 @@ type Slot struct {
 	vehicle     Vehicle // contains the info of the parked vehicle
 }
 
+//CreateSlot - works as a constructor for Slot
+func CreateSlot(ID uint64, available bool, vh Vehicle) *Slot {
+
+	slot := Slot{}
+	slot.id = ID
+	slot.isAvailable = available
+	slot.vehicle = vh
+	return &slot
+}
+
 //ID - getter for id
 func (slot Slot) ID() uint64 {
 	return slot.id
