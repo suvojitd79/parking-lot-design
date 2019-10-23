@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"strconv"
+)
 
 //ParkingLot -
 type ParkingLot struct {
@@ -69,7 +72,7 @@ func (lot ParkingLot) GetSlotByID(id uint64) (Slot, error) {
 //M1 =============================================================================
 
 //GetRegistrationNumbes - gives the list of reg. no associated with a color
-func (lot ParkingLot) GetRegistrationNumbes(color string) ([]string, error) {
+func (lot *ParkingLot) GetRegistrationNumbes(color string) ([]string, error) {
 
 	if val, found := lot.colorRegistrationNumbersDict[color]; found {
 		return val, nil
@@ -114,7 +117,7 @@ func (lot *ParkingLot) AddRegistrationNumber(vh Vehicle) {
 //M2 =============================================================================
 
 //GetSlotNumbers - gives the list of slot. no associated with a color
-func (lot ParkingLot) GetSlotNumbers(color string) ([]uint64, error) {
+func (lot *ParkingLot) GetSlotNumbers(color string) ([]uint64, error) {
 
 	if val, found := lot.colorSlotNumbersDict[color]; found {
 		return val, nil
@@ -166,7 +169,7 @@ func (lot *ParkingLot) AddSlotNumbers(vh Vehicle, id uint64) {
 //M3 =============================================================================
 
 //GetSlotNumber - gives the slot number associated with a registration number
-func (lot ParkingLot) GetSlotNumber(registration string) (uint64, error) {
+func (lot *ParkingLot) GetSlotNumber(registration string) (uint64, error) {
 
 	if val, found := lot.registrationNumberSlotDict[registration]; found {
 		return val, nil
@@ -231,5 +234,5 @@ func (lot *ParkingLot) Park(vh Vehicle) (string, error) {
 	//AddSlotNumbers - add the reg. no associated with a color
 	lot.AddSlotNumbers(vh, availableSpotNumber)
 
-	return "Allocated slot number: " + string(availableSpotNumber), nil
+	return "Allocated slot number: " + strconv.FormatUint(availableSpotNumber, 10), nil
 }
