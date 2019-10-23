@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"sort"
 	"strconv"
 )
 
@@ -17,7 +18,7 @@ type ParkingLot struct {
 }
 
 //CreateParkingLot - works as a constructor for the ParkingLot
-func CreateParkingLot(size uint64) *ParkingLot {
+func CreateParkingLot(size uint64) (*ParkingLot, string) {
 
 	parkingLot := ParkingLot{}
 	parkingLot.capacity = size
@@ -38,7 +39,7 @@ func CreateParkingLot(size uint64) *ParkingLot {
 		parkingLot.nextAvailableSpotNumber = []uint64{} // not available
 	}
 
-	return &parkingLot
+	return &parkingLot, "Created a parking lot with " + strconv.FormatUint(size, 10) + " slots"
 }
 
 //GetCapacity - returns the capacity of the parking lot
@@ -62,11 +63,11 @@ func (lot ParkingLot) GetSlots() []Slot {
 }
 
 //GetSlotByID - return slot with specific id (1 based)
-func (lot ParkingLot) GetSlotByID(id uint64) (Slot, error) {
+func (lot *ParkingLot) GetSlotByID(id uint64) (*Slot, error) {
 	if uint64(len(lot.slots)) < id { // not available
-		return Slot{}, errors.New("Not exists")
+		return &Slot{}, errors.New("Not exists")
 	}
-	return lot.slots[id-1], nil
+	return &lot.slots[id-1], nil
 }
 
 //M1 =============================================================================
@@ -204,6 +205,18 @@ func (lot *ParkingLot) pollAvailableSpotIndex() uint64 {
 	return number
 }
 
+//AddAvailableSpotIndex - adds one available index
+func (lot *ParkingLot) AddAvailableSpotIndex(id uint64) {
+
+	lot.nextAvailableSpotNumber =
+		append(lot.nextAvailableSpotNumber, id)
+	// sort the sports in ascending order
+	sort.Slice(lot.nextAvailableSpotNumber, func(x, y int) bool {
+		return x < y
+	})
+
+}
+
 //Park - park a vehicle if empty spot is found
 func (lot *ParkingLot) Park(vh Vehicle) (string, error) {
 
@@ -235,4 +248,34 @@ func (lot *ParkingLot) Park(vh Vehicle) (string, error) {
 	lot.AddSlotNumbers(vh, availableSpotNumber)
 
 	return "Allocated slot number: " + strconv.FormatUint(availableSpotNumber, 10), nil
+}
+
+//Leave - remove a vehicle from a specific slot
+func (lot *ParkingLot) Leave(id uint64) (string, error) {
+
+	slot, err := lot.GetSlotByID(id)
+
+	if err != nil {
+		return "", errors.New(err.Error())
+	}
+
+	// corner case - if the slot is already free
+	if slot.IsAvailable() {
+		return "Slot number " + strconv.FormatUint(id, 10) + " is free", nil
+	}
+
+	// make the slot available
+	slot.SetAvailable(true)
+
+	lot.RemoveRegistrationNumber(slot.GetVehicle())
+
+	lot.RemoveSlotNumber(slot.GetVehicle())
+
+	lot.RemoveSlotNumbers(slot.GetVehicle())
+
+	// add the id to the next available spot
+	lot.AddAvailableSpotIndex(id)
+
+	return "Slot number " + strconv.FormatUint(id, 10) + " is free", nil
+
 }

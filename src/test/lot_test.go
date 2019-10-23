@@ -9,7 +9,9 @@ import (
 func TestParkingLot(t *testing.T) {
 
 	sampleInputData := []*model.ParkingLot{}
-	sampleInputData = append(sampleInputData, model.CreateParkingLot(3))
+	plot, msg := model.CreateParkingLot(3)
+	t.Log(msg)
+	sampleInputData = append(sampleInputData, plot)
 
 	var str string
 	var err error
